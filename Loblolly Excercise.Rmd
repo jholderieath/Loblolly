@@ -1,0 +1,196 @@
+---
+title: "Loblolly Data Exercises"
+author: "Jason Holderieath"
+date: "December 11, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## The Data
+
+`R` includes a dataset that may be more instructive than examples that can be calculated by hand. First, load the packages you expect to need, in this case `library(ggplot2)`. The `Loblolly` dataset can be loaded:
+
+```{r}
+library(ggplot2)
+data("Loblolly")
+Loblolly
+
+```
+
+Looking at this is not particularly instructive. Let's look at the heading.
+
+```{r}
+head(Loblolly)
+```
+
+From the heading we can identify (from left to right) a column of numbers, most likely some kind of identifier for each _member_. Next is a column named `height`, which appears to be a _quantitative, continuous, variable_. What about `age`? `seed` is a _qualtiative_ variable. How so since it is a number? 
+
+In class we have learned how to sum and square different terms. Let's try some of that.
+
+```{r}
+sum(Loblolly$height)
+```
+
+What does the sum of height mean? Not much. But the operation could be handy. What about sum of squares? That _will_ be handy.
+
+```{r}
+sum(Loblolly$height^2)
+```
+
+Is that different than the sum squared?
+
+```{r}
+sum(Loblolly$height)^2
+```
+
+Sure is. Be careful with that operator and parenthesis placement!
+
+Further we can look at some _descriptive_ statistics.
+
+```{r Loblolly}
+summary(Loblolly)
+```
+
+We will cover the meaning of these more in the coming weeks. What about graphs? Graphs are cool.
+
+```{r}
+# data("Loblolly")
+ggplot(Loblolly, aes(y=height, x=age )) + 
+  geom_point(aes(colour = Seed))+
+  geom_smooth(se = FALSE) +
+  labs(title = "Loblolly Height Over Time By Seed Type")
+```
+
+
+## Frequency
+We learned about frequency tables. Lets build some more specialized frequency tables with our data.First, lets check our range. Then, starting with height. Say we want to set our breaks every 5 feet. 
+
+```{r}
+range(Loblolly$height)
+```
+
+Now set the breaks and classify the height according to the half-unit-length sub-intervals with cut. As the intervals are to be closed on the left, and open on the right, we set the right argument as FALSE. 
+
+```{r}
+breaks = seq(0, 65, by = 5)
+(height.cut = cut(Loblolly$height, breaks, right=FALSE))
+```
+
+Compute the frequency of heights in each sub-interval with the table function. 
+
+```{r}
+(height.freq = table(height.cut))
+```
+
+We apply the cbind function to print the result in column format.
+```{r}
+cbind(height.freq)
+```
+
+```{r}
+barplot(height.freq, main = "counts")
+```
+
+
+
+```{r}
+(h.relFreq <- prop.table(height.freq))
+```
+
+
+```{r}
+(cumulative.height <- signif(cumsum(h.relFreq), digits = 2))
+```
+
+```{r}
+barplot(cumulative.height)
+```
+
+```{r}
+height.ecdf <- ecdf(Loblolly$height)
+plot(height.ecdf, xlab = 'Loblolly Tree Height', ylab = '', main = 'Empirical Cumluative Distribution\nLoblolly Tree Height')
+
+```
+
+```{r}
+height.ordered = sort(Loblolly$height)
+plot(height.ordered, (1:84)/84, type = 's', ylim = c(0, 1), xlab = 'Height', ylab = '', main = 'Empirical Cumluative Distribution\nLoblolly Tree Height')
+# mark the 3rd quartile
+abline(v = 51.36, h = 0.75)
+
+# add a legend
+legend(52, 0.7, '3rd Quartile \n51.36', bty = "n")
+
+# add the label on the y-axis
+mtext(text = 'F(x)', side = 2, line = 2.5)
+
+
+```
+
+
+```{r}
+(tab <- table(Loblolly$Seed))
+```
+
+```{r}
+barplot(tab, main = "counts")
+```
+
+relative frequencies are great. blah blah
+
+```{r}
+(relFreq <- signif(prop.table(tab),digits = 2))
+```
+
+```{r}
+cumsum(relFreq)
+```
+
+## Measures of Central Tendency
+
+### Mean
+```{r}
+mean(Loblolly$height)
+#or
+sum(Loblolly$height)/nrow(Loblolly)
+```
+
+### Median
+```{r}
+median(Loblolly$height)
+#or
+n <- (nrow(Loblolly)+1)/2
+(height.ordered[n]+height.ordered[n+1])/2
+```
+
+### Mode
+```{r}
+Mode <- function(x) {
+  ux <- unique(x)
+  ux[which.max(tabulate(match(x, ux)))]
+}
+
+Mode(Loblolly$height)
+```
+
+## Measures of Dispersion
+
+### Variance
+```{r}
+var(Loblolly$height, y = NULL, na.rm = FALSE)
+```
+
+### Standard Deviation
+```{r}
+var(Loblolly$height, y = NULL, na.rm = FALSE)^.5
+```
+
+## The next big thing
+
+```{r}
+
+```
+
